@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "meeting-notes-assistant"
+version = "1.0.0"
+description = "Consent-first local Windows system-audio transcription and Azure OpenAI meeting notes"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependencies = [
+  "faster-whisper>=1.2,<2",
+  "numpy>=1.26,<2.4",
+  "openai>=1.109,<3",
+  "pydantic>=2.10,<3",
+  "pydantic-settings>=2.7,<3",
+  "PyAudioWPatch>=0.2.12.7,<0.3; sys_platform == 'win32'",
+  "rich>=13.9,<15",
+  "scipy>=1.13,<2",
+  "soundcard>=0.4.4,<0.5; sys_platform == 'win32'",
+  "typer>=0.15,<1",
+]
+
+[project.optional-dependencies]
+dev = ["black>=24.10,<26", "mypy>=1.14,<2", "pytest>=8.3,<9", "pytest-cov>=6,<8", "ruff>=0.9,<1"]
+
+[project.scripts]
+meeting-assistant = "meeting_assistant.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/meeting_assistant"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["meeting_assistant"]
+mypy_path = "src"
+exclude = ["tests"]
+[[tool.mypy.overrides]]
+module = ["faster_whisper.*", "numpy.*", "pyaudiowpatch.*", "soundcard.*", "scipy.*"]
+ignore_missing_imports = true
+follow_imports = "skip"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["integration: requires physical audio hardware or Azure credentials"]
+addopts = "-ra"
